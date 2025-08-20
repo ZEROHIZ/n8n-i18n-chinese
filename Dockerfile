@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # 执行核心的“生成”命令，这会在 /app 目录下创建一个 dist 文件夹
-RUN npm run translate
+RUN npm run i18n:translate
 
 
 # === 阶段2：构建最终运行镜像 ===
