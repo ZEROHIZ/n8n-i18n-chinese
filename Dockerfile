@@ -2,4 +2,4 @@ FROM n8nio/n8n:latest
 
 ENV N8N_DEFAULT_LOCALE=zh-CN
 
-COPY ./n8n-0-100-0/packages/editor-ui/dist /usr/local/lib/node_modules/n8n/node_modules/n8n-editor-ui/dist
+COPY ./editor-ui-dist /usr/local/lib/node_modules/n8n/node_modules/n8n-editor-ui/dist
