@@ -1,26 +1,36 @@
-# Blueprint to deploy the pre-built Chinese n8n image on Render.
+# Use this Blueprint to deploy n8n on Render as a web
+# service that uses a Postgres database to store
+# workflow data.
+#
+# This Blueprint uses free instance types (specified by
+# `plan`) for both the web service and the database. You
+# can upgrade to paid instance types at any time to
+# increase resources.
 
 services:
   - type: web
     plan: free
-    # 使用 runtime: image，因为我们直接拉取一个现成的镜像
-    runtime: image
-    name: n8n-chinese-service
-    
-    # 【核心修改】: 直接指向作者已经构建好的中文版镜像
-    image:
-      url: docker.io/otherblowsnow/n8n-i18n-chinese:latest
+    # 【修改点 1】: 将 runtime 从 'image' 改为 'docker'
+    # 这告诉 Render 我们要从源代码 (Dockerfile) 构建，而不是拉取现成的镜像
+    runtime: docker
+    # 你可以给服务起任何名字
+    name: n8n-service-chinese
 
+    # 【修改点 2】: 删除了整个 'image:' 部分，并替换为下面的 dockerfilePath
+    # 这告诉 Render 使用仓库根目录下的 Dockerfile 文件来构建服务
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+
+    # 所有定义的环境变量都是必需的！
     envVars:
-      # 这个密钥用于加密凭证，Render 会自动生成
+      # 为 n8n 中的加密凭证生成一个 base64 编码的密钥
+      #
+      # 生成后不要修改此值！
+      # 否则，你将失去对使用先前值加密的所有凭证的访问权限。
       - key: N8N_ENCRYPTION_KEY
         generateValue: true
 
-      # 【重要】: 设置默认语言为中文
-      - key: N8N_DEFAULT_LOCALE
-        value: zh-CN
-
-      # 自动连接到下面定义的数据库
+      # 这些会自动填充下面定义的 Render Postgres 数据库的连接详细信息
       - key: DB_TYPE
         value: postgresdb
       - key: DB_POSTGRESDB_DATABASE
@@ -39,7 +49,17 @@ services:
         fromDatabase:
           name: n8n-db
           property: user
+      
+      # 【修改点 3】: 在这里添加一个新的环境变量来设置默认语言为中文
+      - key: N8N_DEFAULT_LOCALE
+        value: zh-CN
 
 databases:
   - name: n8n-db
     plan: free
+    # 免费实例类型限制为 1 GB 的磁盘空间。
+    #
+    # 如果你之后升级到付费实例类型，可以通过
+    # 设置 `diskSizeGB` 属性来增加磁盘大小。
+    #
+    # diskSizeGB: 5
