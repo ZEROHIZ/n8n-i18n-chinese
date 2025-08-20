@@ -1,4 +1,4 @@
-FROM n8nio/n8n:${VERSION}
+FROM n8nio/n8n:1
 
 ENV N8N_DEFAULT_LOCALE=zh-CN
 
